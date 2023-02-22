@@ -1,8 +1,8 @@
-package fr.subapp.subappdesktop.competiteur.dao;
+package fr.subapp.subappdesktop.dao;
 
-import fr.subapp.subappdesktop.competiteur.model.Competiteur;
-import fr.subapp.subappdesktop.competiteur.utils.Categorie;
-import fr.subapp.subappdesktop.competiteur.utils.Sexe;
+import fr.subapp.subappdesktop.model.Competiteur;
+import fr.subapp.subappdesktop.utils.Categorie;
+import fr.subapp.subappdesktop.utils.Sexe;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;

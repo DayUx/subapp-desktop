@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
 import {
   AimOutlined,
   MenuFoldOutlined,
@@ -6,13 +6,17 @@ import {
   SettingOutlined,
   UserOutlined,
   OrderedListOutlined,
+  TeamOutlined,
+  FlagOutlined,
 } from "@ant-design/icons";
-import { Button, Layout, Menu, theme } from "antd";
+import { Button, Layout, Menu, theme, Typography } from "antd";
+const { Title, Text } = Typography;
 
 import logo_l_white from "./assets/logo_l_white.png";
 import logo_s_white from "./assets/logo_s_white.png";
 import "./App.css";
-import Competiteurs from "./pages/Competiteurs/Competiteurs";
+import Competiteurs from "./pages/competiteurs/Competiteurs";
+import SaisieTirs from "./pages/saisietirs/SaisieTirs";
 
 const { Header, Sider, Content } = Layout;
 
@@ -27,13 +31,46 @@ function App() {
       case "1":
         return <div>Saisie des tirs</div>;
       case "2":
-        return <div>Résultats</div>;
+        return <SaisieTirs />;
       case "3":
         return <Competiteurs />;
       case "4":
+        return <div>Résultats</div>;
+      case "5":
         return <div>Paramètres</div>;
     }
   };
+  const getLabel = (): string => {
+    return items.find((item) => item.key === selectedKey)?.label || "";
+  };
+
+  const items = [
+    {
+      key: "1",
+      icon: <FlagOutlined />,
+      label: "Arbitrage",
+    },
+    {
+      key: "2",
+      icon: <AimOutlined />,
+      label: "Saisie des tirs",
+    },
+    {
+      key: "3",
+      icon: <TeamOutlined />,
+      label: "Compétiteurs",
+    },
+    {
+      key: "4",
+      icon: <OrderedListOutlined />,
+      label: "Résultats",
+    },
+    {
+      key: "5",
+      icon: <SettingOutlined />,
+      label: "Paramètres",
+    },
+  ];
   return (
     <Layout style={{ height: "100vh" }}>
       <Sider trigger={null} collapsible collapsed={collapsed}>
@@ -46,32 +83,19 @@ function App() {
           defaultSelectedKeys={["1"]}
           selectedKeys={[selectedKey]}
           onSelect={(e) => setSelectedKey(e.key)}
-          items={[
-            {
-              key: "1",
-              icon: <AimOutlined />,
-              label: "Saisie des tirs",
-            },
-            {
-              key: "2",
-              icon: <OrderedListOutlined />,
-              label: "Résultats",
-            },
-            {
-              key: "3",
-              icon: <UserOutlined />,
-              label: "Compétiteurs",
-            },
-            {
-              key: "4",
-              icon: <SettingOutlined />,
-              label: "Paramètres",
-            },
-          ]}
+          items={items}
         />
       </Sider>
       <Layout className="site-layout">
-        <Header style={{ padding: "0 16px", background: colorBgContainer }}>
+        <Header
+          style={{
+            padding: "0 16px",
+            background: colorBgContainer,
+            display: "flex",
+            gap: "16px",
+            alignItems: "center",
+          }}
+        >
           <Button
             onClick={() => setCollapsed(!collapsed)}
             icon={
@@ -82,6 +106,7 @@ function App() {
               )
             }
           ></Button>
+          <Text strong>{getLabel()}</Text>
         </Header>
 
         <Content

@@ -1,8 +1,9 @@
-package fr.subapp.subappdesktop.competiteur.service.applicatif.transformateur;
+package fr.subapp.subappdesktop.service.applicatif;
 
-import fr.subapp.subappdesktop.competiteur.model.Competiteur;
-import fr.subapp.subappdesktop.competiteur.model.CompetiteurDTO;
-import fr.subapp.subappdesktop.competiteur.service.metier.CompetiteurServiceMetier;
+import fr.subapp.subappdesktop.model.Competiteur;
+import fr.subapp.subappdesktop.model.CompetiteurDTO;
+import fr.subapp.subappdesktop.service.applicatif.transformateur.CompetiteurTransformateur;
+import fr.subapp.subappdesktop.service.metier.CompetiteurServiceMetier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

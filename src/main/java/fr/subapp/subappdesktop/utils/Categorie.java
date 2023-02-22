@@ -1,4 +1,4 @@
-package fr.subapp.subappdesktop.competiteur.utils;
+package fr.subapp.subappdesktop.utils;
 
 public enum Categorie {
     MINIME("Minime"),

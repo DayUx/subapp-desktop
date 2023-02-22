@@ -1,8 +1,8 @@
-package fr.subapp.subappdesktop.competiteur.controller;
+package fr.subapp.subappdesktop.controller;
 
 
-import fr.subapp.subappdesktop.competiteur.model.CompetiteurDTO;
-import fr.subapp.subappdesktop.competiteur.service.applicatif.transformateur.CompetiteurServiceApplicatif;
+import fr.subapp.subappdesktop.model.CompetiteurDTO;
+import fr.subapp.subappdesktop.service.applicatif.CompetiteurServiceApplicatif;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;

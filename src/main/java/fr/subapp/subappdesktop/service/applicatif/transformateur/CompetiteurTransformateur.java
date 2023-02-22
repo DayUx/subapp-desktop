@@ -1,8 +1,7 @@
-package fr.subapp.subappdesktop.competiteur.service.applicatif.transformateur;
+package fr.subapp.subappdesktop.service.applicatif.transformateur;
 
-import fr.subapp.subappdesktop.competiteur.model.Competiteur;
-import fr.subapp.subappdesktop.competiteur.model.CompetiteurDTO;
-import fr.subapp.subappdesktop.competiteur.utils.Sexe;
+import fr.subapp.subappdesktop.model.Competiteur;
+import fr.subapp.subappdesktop.model.CompetiteurDTO;
 import org.springframework.stereotype.Service;
 
 @Service

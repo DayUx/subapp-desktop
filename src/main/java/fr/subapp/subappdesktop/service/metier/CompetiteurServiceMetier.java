@@ -1,7 +1,7 @@
-package fr.subapp.subappdesktop.competiteur.service.metier;
+package fr.subapp.subappdesktop.service.metier;
 
-import fr.subapp.subappdesktop.competiteur.dao.CompetiteurDAO;
-import fr.subapp.subappdesktop.competiteur.model.Competiteur;
+import fr.subapp.subappdesktop.dao.CompetiteurDAO;
+import fr.subapp.subappdesktop.model.Competiteur;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -1,7 +1,7 @@
-package fr.subapp.subappdesktop.competiteur.model;
+package fr.subapp.subappdesktop.model;
 
-import fr.subapp.subappdesktop.competiteur.utils.Categorie;
-import fr.subapp.subappdesktop.competiteur.utils.Sexe;
+import fr.subapp.subappdesktop.utils.Categorie;
+import fr.subapp.subappdesktop.utils.Sexe;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
