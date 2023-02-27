@@ -6,8 +6,9 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 
 @RestController
@@ -17,9 +18,16 @@ public class AppController {
     @Value("${server.port}")
     int port;
 
-
     @GetMapping("getIpAndPort")
     public AppAdressDTO getIpAndPort() throws UnknownHostException {
-        return new AppAdressDTO(InetAddress.getLocalHost().getHostAddress(), port);
+
+        String ip = null;
+        try(final DatagramSocket socket = new DatagramSocket()){
+            socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+            ip = socket.getLocalAddress().getHostAddress();
+            return new AppAdressDTO(InetAddress.getLocalHost().getHostAddress(), port);
+        } catch (SocketException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

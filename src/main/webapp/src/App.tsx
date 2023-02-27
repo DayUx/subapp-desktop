@@ -18,6 +18,7 @@ import "./App.css";
 import Competiteurs from "./pages/competiteurs/Competiteurs";
 import SaisieTirs from "./pages/saisietirs/SaisieTirs";
 import CardAdresse from "./components/card/adresse/CardAdresse";
+import TargetPreview from "./components/targetpreview/TargetPreview";
 
 const { Header, Sider, Content } = Layout;
 
