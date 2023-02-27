@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/competiteur")
+@RequestMapping("api/competiteur")
 @RequiredArgsConstructor
 public class CompetiteurController {
 

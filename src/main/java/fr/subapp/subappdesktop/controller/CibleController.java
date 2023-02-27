@@ -14,7 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @CrossOrigin
-@RequestMapping("/cible")
+@RequestMapping("api/cible")
 public class CibleController {
     private final CibleServiceApplicatif cibleServiceApplicatif;
     @PostMapping("upload")

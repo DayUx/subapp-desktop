@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Button, Card, Image } from "antd";
+import { Button, Card, Image, Layout, Segmented, Tooltip } from "antd";
 import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
 import TagEpreuve from "../../components/tag/epreuve/TagEpreuve";
+import { SUBAPP_URL } from "../../Utils/AppUtils";
+const { Header, Sider, Content } = Layout;
 
 interface Cible {
   idCompetiteur: number;
@@ -14,7 +16,7 @@ const SaisieTirs = () => {
   const [cibles, setCibles] = useState<Cible[]>([]);
 
   useEffect(() => {
-    fetch("http://localhost:8080/cible/getAll", {
+    fetch(`${SUBAPP_URL}/cible/getAll`, {
       method: "GET",
     }).then((res) => {
       const ok = res.ok;
@@ -29,38 +31,55 @@ const SaisieTirs = () => {
   }, []);
 
   return (
-    <div
+    <Content
       style={{
-        width: 300,
+        height: "100%",
+        display: "flex",
+        flexWrap: "wrap",
+        overflowY: "scroll",
+        gap: 10,
       }}
     >
-      {cibles.map((cible) => (
-        <div>
-          <Card
-            title={`${cible.nom} - ${cible.epreuve}`}
-            extra={
-              <>
-                <TagEpreuve libelle={cible.epreuve} />
-                <Button type={"primary"} icon={<CheckOutlined />}></Button>
+      {cibles.map((cible, key) => (
+        <Card
+          key={key}
+          style={{
+            width: 350,
+            height: 350,
+          }}
+          title={`${cible.idCompetiteur} - ${cible.nom}`}
+          extra={
+            <>
+              <TagEpreuve libelle={cible.epreuve} />
+              <Tooltip
+                placement="bottom"
+                title={"Valider la saisie automatique"}
+              >
+                <Button
+                  shape={"circle"}
+                  type={"primary"}
+                  icon={<CheckOutlined />}
+                ></Button>
+              </Tooltip>
+              <Tooltip
+                placement="bottom"
+                title={"Refuser la saisie automatique"}
+              >
                 <Button
                   style={{ marginLeft: 10 }}
+                  shape={"circle"}
                   type={"primary"}
                   icon={<CloseOutlined />}
                   danger
                 ></Button>
-              </>
-            }
-          >
-            <Image
-              src={cible.cheminImg}
-              width={200}
-              height={200}
-              alt={cible.epreuve}
-            />
-          </Card>
-        </div>
+              </Tooltip>
+            </>
+          }
+        >
+          <Image src={cible.cheminImg} alt={cible.epreuve} />
+        </Card>
       ))}
-    </div>
+    </Content>
   );
 };
 

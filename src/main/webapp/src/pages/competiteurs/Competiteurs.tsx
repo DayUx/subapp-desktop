@@ -3,6 +3,7 @@ import { Table, Tag, Tooltip } from "antd";
 import { ColumnsType } from "antd/es/table";
 
 import { ManOutlined, WomanOutlined } from "@ant-design/icons";
+import { SUBAPP_URL } from "../../Utils/AppUtils";
 interface DataType {
   nom: string;
   prenom: string;
@@ -16,7 +17,7 @@ const Competiteurs = () => {
   const [dataSource, setDataSource] = useState<DataType[] | undefined>();
 
   useEffect(() => {
-    fetch("http://localhost:8080/competiteur/getAll", {
+    fetch(`${SUBAPP_URL}/competiteur/getAll`, {
       method: "GET",
     }).then((res) => {
       const ok = res.ok;

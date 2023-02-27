@@ -17,6 +17,7 @@ import logo_s_white from "./assets/logo_s_white.png";
 import "./App.css";
 import Competiteurs from "./pages/competiteurs/Competiteurs";
 import SaisieTirs from "./pages/saisietirs/SaisieTirs";
+import CardAdresse from "./components/card/adresse/CardAdresse";
 
 const { Header, Sider, Content } = Layout;
 
@@ -29,7 +30,7 @@ function App() {
   const switchContent = (): ReactNode => {
     switch (selectedKey) {
       case "1":
-        return <div>Saisie des tirs</div>;
+        return <CardAdresse></CardAdresse>;
       case "2":
         return <SaisieTirs />;
       case "3":
