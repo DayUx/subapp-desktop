@@ -9,8 +9,14 @@ import {
   TeamOutlined,
   FlagOutlined,
 } from "@ant-design/icons";
-import { Button, Layout, Menu, theme, Typography } from "antd";
+import { Button, Layout, Menu, theme, Typography, ConfigProvider } from "antd";
 const { Title, Text } = Typography;
+import {
+  blue,
+  presetDarkPalettes,
+  presetPalettes,
+  presetPrimaryColors,
+} from "@ant-design/colors";
 
 import logo_l_white from "./assets/logo_l_white.png";
 import logo_s_white from "./assets/logo_s_white.png";
@@ -21,12 +27,13 @@ import CardAdresse from "./components/card/adresse/CardAdresse";
 import TargetPreview from "./components/targetpreview/TargetPreview";
 
 const { Header, Sider, Content } = Layout;
-
 function App() {
+  const { token } = theme.useToken();
+  console.log(presetPrimaryColors);
   const [collapsed, setCollapsed] = useState(false);
-  const {
-    token: { colorBgContainer },
-  } = theme.useToken();
+
+  const { defaultAlgorithm, darkAlgorithm } = theme;
+
   const [selectedKey, setSelectedKey] = useState("1");
   const switchContent = (): ReactNode => {
     switch (selectedKey) {
@@ -73,55 +80,51 @@ function App() {
       label: "Paramètres",
     },
   ];
+  // @ts-ignore
   return (
-    <Layout style={{ height: "100vh" }}>
-      <Sider trigger={null} collapsible collapsed={collapsed}>
-        <div className="logo ">
-          <img src={collapsed ? logo_s_white : logo_l_white} />
-        </div>
-        <Menu
-          theme="dark"
-          mode="inline"
-          defaultSelectedKeys={["1"]}
-          selectedKeys={[selectedKey]}
-          onSelect={(e) => setSelectedKey(e.key)}
-          items={items}
-        />
-      </Sider>
-      <Layout className="site-layout">
-        <Header
-          style={{
-            padding: "0 16px",
-            background: colorBgContainer,
-            display: "flex",
-            gap: "16px",
-            alignItems: "center",
-          }}
-        >
-          <Button
-            onClick={() => setCollapsed(!collapsed)}
-            icon={
-              collapsed ? (
-                <MenuUnfoldOutlined></MenuUnfoldOutlined>
-              ) : (
-                <MenuFoldOutlined></MenuFoldOutlined>
-              )
-            }
-          ></Button>
-          <Text strong>{getLabel()}</Text>
-        </Header>
+    <ConfigProvider>
+      <Layout style={{ height: "100vh" }}>
+        <Sider trigger={null} collapsible collapsed={collapsed}>
+          <div className="logo ">
+            <img src={collapsed ? logo_s_white : logo_l_white} />
+          </div>
+          <Menu
+            theme="dark"
+            mode="inline"
+            defaultSelectedKeys={["1"]}
+            selectedKeys={[selectedKey]}
+            onSelect={(e) => setSelectedKey(e.key)}
+            items={items}
+          />
+        </Sider>
+        <Layout className="site-layout">
+          <Header
+            style={{
+              padding: "0 16px",
+              display: "flex",
+              gap: "16px",
+              alignItems: "center",
+              backgroundColor: token.colorBgContainer,
+              borderBottom: `1px solid ${token.colorBorder}`,
+            }}
+          >
+            <Button
+              onClick={() => setCollapsed(!collapsed)}
+              icon={
+                collapsed ? (
+                  <MenuUnfoldOutlined></MenuUnfoldOutlined>
+                ) : (
+                  <MenuFoldOutlined></MenuFoldOutlined>
+                )
+              }
+            ></Button>
+            <Text strong>{getLabel()}</Text>
+          </Header>
 
-        <Content
-          style={{
-            margin: "24px 16px",
-            padding: 24,
-            background: colorBgContainer,
-          }}
-        >
-          {switchContent()}
-        </Content>
+          <Content style={{}}>{switchContent()}</Content>
+        </Layout>
       </Layout>
-    </Layout>
+    </ConfigProvider>
   );
 }
 

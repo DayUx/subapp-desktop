@@ -6,26 +6,30 @@ import { CheckOutlined } from "@ant-design/icons";
 const TagEpreuve = ({ libelle }) => {
   const tags = [
     {
-      libelle: "BIATHLON",
+      value: "BIATHLON",
+      libelle: "Biathlon",
       color: "red",
     },
     {
-      libelle: "SUPER_BIATHLON",
+      value: "SUPER_BIATHLON",
+      libelle: "Super Biathlon",
       color: "blue",
     },
     {
-      libelle: "PRECISION",
+      value: "PRECISION",
+      libelle: "Précision",
       color: "green",
     },
     {
-      libelle: "RELAIS",
+      value: "RELAIS",
+      libelle: "Relais",
       color: "yellow",
     },
   ];
 
   return (
-    <Tag color={tags.find((tag) => tag.libelle === libelle)?.color || ""}>
-      {tags.find((tag) => tag.libelle === libelle)?.libelle || ""}
+    <Tag color={tags.find((tag) => tag.value === libelle)?.color || ""}>
+      {tags.find((tag) => tag.value === libelle)?.libelle || ""}
     </Tag>
   );
 };
