@@ -45,7 +45,7 @@ const CardAdresse = () => {
         }}
       >
         <QRCode
-          value={`http://${adresse.ip}:${adresse.port}`}
+          value={`htpp://subapp.tirsub`}
           status={adresse.ip && adresse.port ? undefined : "loading"}
         />
 

@@ -27,12 +27,8 @@ public class CibleController {
         cibleServiceApplicatif.saveImage(uploadDir, fileName, image);
 
     }
-
-
     @GetMapping("getAll")
     public List<CibleDTO> getAllCible() {
         return cibleServiceApplicatif.getAllCible();
     }
-
-
 }

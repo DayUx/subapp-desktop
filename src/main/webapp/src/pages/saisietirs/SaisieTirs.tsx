@@ -13,24 +13,60 @@ import {
   theme,
   Tooltip,
 } from "antd";
-import { AimOutlined, CheckOutlined, CloseOutlined } from "@ant-design/icons";
+import {
+  AimOutlined,
+  CheckOutlined,
+  CloseOutlined,
+  ClockCircleOutlined,
+  FieldTimeOutlined,
+  TeamOutlined,
+} from "@ant-design/icons";
 import TagEpreuve from "../../components/tag/epreuve/TagEpreuve";
 import { SUBAPP_URL } from "../../Utils/AppUtils";
 import TargetPreview from "../../components/targetpreview/TargetPreview";
+import { impactData, TargetData } from "../../Utils/target/TargetUtils";
 const { Header, Sider, Content } = Layout;
 
-interface Cible {
+interface CibleData {
   idCompetiteur: number;
   cheminImg: string;
   epreuve: string;
   nom: string;
+  impacts: impactData[];
 }
+
+type epreuveInfosOptions = {
+  [key: string]: {
+    label: string;
+    icon: React.ReactNode;
+  };
+};
+
+const epreuvesInfos: epreuveInfosOptions = {
+  SUPER_BIATHLON: {
+    label: "Super Biathlon",
+    icon: <FieldTimeOutlined />,
+  },
+  BIATHLON: {
+    label: "Biathlon",
+    icon: <ClockCircleOutlined />,
+  },
+  PRECISION: {
+    label: "Précision",
+    icon: <AimOutlined />,
+  },
+  RELAIS: {
+    label: "Relais",
+    icon: <TeamOutlined />,
+  },
+};
+
 type MenuItem = Required<MenuProps>["items"][number];
 
 const SaisieTirs = () => {
   const { token } = theme.useToken();
-  const [cibles, setCibles] = useState<Cible[]>([]);
-  const [selectedCible, setSelectedCible] = useState<Cible | null>(null);
+  const [cibles, setCibles] = useState<CibleData[]>([]);
+  const [selectedCible, setSelectedCible] = useState<CibleData | null>(null);
   const [selectedKeys, setSelectedKeys] = useState();
 
   useEffect(() => {
@@ -59,7 +95,7 @@ const SaisieTirs = () => {
   const generateMenuItems = (): MenuProps["items"] => {
     const epreuves = [...new Set(cibles.map((cible) => cible.epreuve))];
     let menuItems: MenuProps["items"] = [];
-    epreuves.forEach((epreuve, indexEpreuve) => {
+    epreuves.forEach((epreuve: string, indexEpreuve) => {
       if (menuItems) {
         const childrens = cibles
           .filter((cible) => cible.epreuve === epreuve)
@@ -75,16 +111,18 @@ const SaisieTirs = () => {
 
         menuItems[indexEpreuve] = {
           key: indexEpreuve,
+          icon: epreuvesInfos[epreuve] ? epreuvesInfos[epreuve].icon : null,
           label: (
-            <Badge
-              count={childrens.length}
-              size="small"
-              style={{
-                transform: "translate(80%, -40%)",
-              }}
-            >
-              {epreuve}
-            </Badge>
+            <>
+              {epreuvesInfos[epreuve] ? epreuvesInfos[epreuve].label : null}
+              <Badge
+                count={childrens.length}
+                size="small"
+                style={{
+                  transform: "translate(-20%, -50%)",
+                }}
+              ></Badge>
+            </>
           ),
           children: childrens,
         };
@@ -113,13 +151,17 @@ const SaisieTirs = () => {
         mode="inline"
         items={generateMenuItems()}
       ></Menu>
-
       <div
         style={{
           flex: 1,
+          visibility: selectedCible ? "visible" : "hidden",
         }}
       >
-        <TargetPreview></TargetPreview>
+        <TargetPreview
+          impacts={
+            selectedCible && selectedCible.impacts ? selectedCible.impacts : []
+          }
+        ></TargetPreview>
         <Image src={selectedCible?.cheminImg}></Image>
         <button
           onClick={() => {

@@ -4,12 +4,14 @@ import fr.subapp.subappdesktop.utils.Epreuve;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 public class CibleDTO {
-    int idCompetiteur;
-    String cheminImg;
-    String nom;
-
-    Epreuve epreuve;
+    private int idCompetiteur;
+    private String cheminImg;
+    private String nom;
+    private Epreuve epreuve;
+    private List<ImpactDTO> impacts;
 }

@@ -25,7 +25,7 @@ public class AppController {
         try(final DatagramSocket socket = new DatagramSocket()){
             socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
             ip = socket.getLocalAddress().getHostAddress();
-            return new AppAdressDTO(InetAddress.getLocalHost().getHostAddress(), port);
+            return new AppAdressDTO(ip, port);
         } catch (SocketException e) {
             throw new RuntimeException(e);
         }

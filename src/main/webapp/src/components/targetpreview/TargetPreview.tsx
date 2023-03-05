@@ -1,88 +1,54 @@
 import targetBlueprint from "../../assets/target_blueprint.svg";
 import { Tooltip } from "antd";
+import { impactData, TargetZone } from "../../Utils/target/TargetUtils";
 
-interface TargetData {
-  topLeft: impactData[];
-  topRight: impactData[];
-  bottomLeft: impactData[];
-  bottomRight: impactData[];
-  center: impactData[];
-}
+type TargetPreviewProps = {
+  impacts: impactData[];
+};
 
-enum TargetZone {
-  topLeft = "topLeft",
-  topRight = "topRight",
-  bottomLeft = "bottomLeft",
-  bottomRight = "bottomRight",
-  center = "center",
-}
-interface impactData {
-  point: number;
-  angle: number;
-}
-
-const TargetPreview = () => {
+const TargetPreview = ({ impacts = [] }: TargetPreviewProps) => {
   const caseSize = 9;
   const cibleSize = 2565;
   const visuelSize = 810;
   const globalPadding = 180;
+  const arrowSize = 9 * 6;
 
-  let TargetData = {
-    topLeft: [
-      {
-        point: 570,
-        angle: 0,
-      },
-    ],
-    topRight: [
-      {
-        point: 570,
-        angle: 0,
-      },
-    ],
-    bottomLeft: [
-      {
-        point: 570,
-        angle: 0,
-      },
-    ],
-    bottomRight: [
-      {
-        point: 570,
-        angle: 0,
-      },
-    ],
-    center: [
-      {
-        point: 570,
-        angle: 0,
-      },
-    ],
+  const pointToDistance = (points: number) => {
+    let i;
+
+    for (i = 0; i < 43 && points > 411; i++) {
+      points = points - 3;
+    }
+    for (; i < 48 && points > 411; i++) {
+      points = points - 6;
+    }
+    console.log(i, points);
+    return 48 - i;
   };
 
-  const placeImpact = (impact: impactData, area: TargetZone) => {
+  const placeImpact = (impact: impactData) => {
     let center = {
       x: "0%",
       y: "0%",
     };
-    switch (area) {
-      case TargetZone.topLeft:
+    switch (impact.zone) {
+      case TargetZone.TOP_LEFT:
         center.x = sizeToPercent(globalPadding + visuelSize / 2);
         center.y = sizeToPercent(cibleSize - globalPadding - visuelSize / 2);
         break;
-      case TargetZone.topRight:
+      case TargetZone.TOP_RIGHT:
         center.x = sizeToPercent(cibleSize - globalPadding - visuelSize / 2);
         center.y = sizeToPercent(cibleSize - globalPadding - visuelSize / 2);
         break;
-      case TargetZone.bottomLeft:
+      case TargetZone.BOTTOM_LEFT:
         center.x = sizeToPercent(globalPadding + visuelSize / 2);
         center.y = sizeToPercent(globalPadding + visuelSize / 2);
         break;
-      case TargetZone.bottomRight:
+      case TargetZone.BOTTOM_RIGHT:
         center.x = sizeToPercent(cibleSize - globalPadding - visuelSize / 2);
         center.y = sizeToPercent(globalPadding + visuelSize / 2);
         break;
-      case TargetZone.center:
+      case TargetZone.CENTER:
         center.x = "50%";
         center.y = "50%";
         break;
@@ -91,17 +57,19 @@ const TargetPreview = () => {
     }
 
     return (
-      <Tooltip title={`Point: ${impact.point}`}>
+      <Tooltip title={`Point: ${impact.points}`}>
         <div
           style={{
             position: "absolute",
-            height: 10,
-            width: 10,
-            transform: `translate(-50%, 50%)`,
+            height: sizeToPercent(arrowSize),
+            width: sizeToPercent(arrowSize),
+            transform: `rotate(${impact.angle}deg) translate(${
+              ((pointToDistance(impact.points) * caseSize) / arrowSize) * 100
+            }%) `,
             borderRadius: "50%",
             backgroundColor: "red",
-            bottom: center.y,
-            left: center.x,
+            bottom: `calc(${center.y} - ${sizeToPercent(arrowSize / 2)})`,
+            left: `calc(${center.x} - ${sizeToPercent(arrowSize / 2)})`,
           }}
         ></div>
       </Tooltip>
@@ -109,6 +77,7 @@ const TargetPreview = () => {
   };
 
   const sizeToPercent = (size: number) => {
+    console.log((size / cibleSize) * 100 + "%");
     return (size / cibleSize) * 100 + "%";
   };
 
@@ -123,20 +92,8 @@ const TargetPreview = () => {
         position: "relative",
       }}
     >
-      {TargetData.topLeft.map((impact: impactData, index) => {
-        return placeImpact(impact, TargetZone.topLeft);
-      })}
-      {TargetData.topRight.map((impact: impactData, index) => {
-        return placeImpact(impact, TargetZone.topRight);
-      })}
-      {TargetData.bottomLeft.map((impact: impactData, index) => {
-        return placeImpact(impact, TargetZone.bottomLeft);
-      })}
-      {TargetData.bottomRight.map((impact: impactData, index) => {
-        return placeImpact(impact, TargetZone.bottomRight);
-      })}
-      {TargetData.center.map((impact: impactData, index) => {
-        return placeImpact(impact, TargetZone.center);
+      {impacts.map((impact: impactData, index: number) => {
+        return placeImpact(impact);
       })}
     </div>
   );
