@@ -15,6 +15,41 @@ public class Camera extends JFrame {
     private JLabel cameraScreen = new JLabel();
 
 
+    public static Mat getTopLeftTarget(Mat mat) {
+        Mat img = mat.clone();
+        Rect rectCrop = new Rect(0, 0, img.width() / 2, img.height() / 2);
+        Mat croppedImage = new Mat(img, rectCrop);
+        return croppedImage;
+    }
+
+    public static Mat getTopRightTarget(Mat mat) {
+        Mat img = mat.clone();
+        Rect rectCrop = new Rect(img.width() / 2, 0, img.width() / 2, img.height() / 2);
+        Mat croppedImage = new Mat(img, rectCrop);
+        return croppedImage;
+    }
+
+    public static Mat getBottomLeftTarget(Mat mat) {
+        Mat img = mat.clone();
+        Rect rectCrop = new Rect(0, img.height() / 2, img.width() / 2, img.height() / 2);
+        Mat croppedImage = new Mat(img, rectCrop);
+        return croppedImage;
+    }
+
+    public static Mat getBottomRightTarget(Mat mat) {
+        Mat img = mat.clone();
+        Rect rectCrop = new Rect(img.width() / 2, img.height() / 2, img.width() / 2, img.height() / 2);
+        Mat croppedImage = new Mat(img, rectCrop);
+        return croppedImage;
+    }
+
+    public static Mat getCenterTarget(Mat mat) {
+        Mat img = mat.clone();
+        Rect rectCrop = new Rect(img.width() / 4, img.height() / 4, img.width() / 2, img.height() / 2);
+        Mat croppedImage = new Mat(img, rectCrop);
+        return croppedImage;
+    }
+
 
     public static Mat extractDocument(Mat mat) {
 
@@ -115,23 +150,12 @@ public class Camera extends JFrame {
                     screenCnt = approx;
                     break;
                 }
-
             }
         }
-
         if (screenCnt == null) {
             System.out.println("No contour found");
             return mat;
         }
-
-        MatOfPoint screenCnt2 = new MatOfPoint(screenCnt.toArray());
-
-        //draw contour
-        Imgproc.drawContours(mat, Collections.singletonList(screenCnt2), -1, new Scalar(0, 255, 0), 3);
-
-
-        //apply the four point transform to obtain a top-down
-        //view of the original image
         MatOfPoint2f approx = new MatOfPoint2f(screenCnt.toArray());
         MatOfPoint2f dst = new MatOfPoint2f(new Point(0, 0), new Point(mat.cols() - 1, 0), new Point(mat.cols() - 1, mat.rows() - 1), new Point(0, mat.rows() - 1));
         Mat transform = Imgproc.getPerspectiveTransform(approx, dst);
@@ -187,7 +211,17 @@ public class Camera extends JFrame {
 //        String s = currentRelativePath.toAbsolutePath().toString();
 //        System.out.println("Current absolute path is: " + s);
 //        Mat mat = Imgcodecs.imread("./src/main/resources/img.png");
+
+        //draw a circle
+        Mat circle = new Mat(mat.size(), CvType.CV_8UC1, new Scalar(0,0, 0));
+        Imgproc.circle(circle, new Point(mat.cols() / 2, mat.rows() / 2), (int) (mat.cols() / 2.2), new Scalar(255,255,255), -1);
+//        Imshow.show(circle, "circle");
         Mat kernel = Mat.ones(5, 5, CvType.CV_8UC1);
+
+
+
+
+
         Mat redDots = new Mat();
         Core.inRange(mat, new Scalar(0, 0, 150), new Scalar(100, 100, 255), redDots);
         Imgproc.dilate(redDots, redDots, kernel, new Point(-1, -1), 1);
@@ -206,6 +240,8 @@ public class Camera extends JFrame {
 
         Mat value_mask = new Mat();
         Core.inRange(value, new Scalar(0), new Scalar(150), value_mask);
+        Core.bitwise_and(value_mask,circle , value_mask);
+
 //        Imshow.show(value_mask, "value_mask");
 
         Mat close = new Mat();
@@ -222,7 +258,7 @@ public class Camera extends JFrame {
 
         MatOfPoint biggestContour = getBiggestContour(contours);
 
-        Imgproc.drawContours(close, Collections.singletonList(biggestContour), -1, new Scalar(255, 255, 255), Imgproc.FILLED);
+        Imgproc.drawContours(close, Collections.singletonList(biggestContour), -1, new Scalar(255, 255, 255), -1);
 //        Imshow.show(close, "filled");
         Imgproc.morphologyEx(close, open, Imgproc.MORPH_OPEN, kernel2);
 //        Imshow.show(open, "open");
@@ -239,6 +275,7 @@ public class Camera extends JFrame {
 
         Mat empty = Mat.zeros(mat.size(), mat.type());
         Imgproc.ellipse(empty, ellipse, new Scalar(255, 255, 255), Imgproc.FILLED);
+        Imgproc.circle(mat, ellipse.center, 2, new Scalar(0, 0, 255), -1);
 //        Imshow.show(empty, "ellipse");
 
         Imgproc.cvtColor(empty, empty, Imgproc.COLOR_BGR2GRAY);
