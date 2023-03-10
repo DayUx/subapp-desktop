@@ -205,7 +205,88 @@ public class Camera extends JFrame {
     }
 
 
-    public static Mat getOuterCircle(Mat mat) {
+    public static float getDistance(Point p1, Point p2) {
+        return (float) Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+    }
+    public static float getAngle(Point p1, Point p2) {
+        return (float) Math.atan2(p2.y - p1.y, p2.x - p1.x);
+    }
+
+
+
+    public static int getPoint(Point center, Point border, Point impact) {
+        double length = getDistance(center, border);
+        double distance = getDistance(center, impact);
+        double percent = distance / length;
+        int realLength = 45;
+        int realDistance = (int) Math.ceil(realLength * percent);
+        int point = 570;
+        int i = 0;
+        if (realDistance > 45) {
+            return 0;
+        }
+        for (; i < 5 && realDistance > 0; i++) {
+            point -= 6;
+            realDistance -= 1;
+        }
+        for (; i < 48 && realDistance > 0; i++) {
+            point -= 3;
+            realDistance -= 1;
+        }
+        return point;
+    }
+
+
+    public static Point getPointOnEllipse(Point center, double radiusX, double radiusY, double angle) {
+        return new Point(center.x + Math.cos(angle) * radiusX, center.y + Math.sin(angle) * radiusY);
+    }
+
+
+    public static Point rotatePoint(Point center, Point point, double angle) {
+        double s = Math.sin(angle);
+        double c = Math.cos(angle);
+
+        // translate point back to origin:
+        point.x -= center.x;
+        point.y -= center.y;
+
+        // rotate point
+        double xnew = point.x * c - point.y * s;
+        double ynew = point.x * s + point.y * c;
+
+        // translate point back:
+        point.x = xnew + center.x;
+        point.y = ynew + center.y;
+        return point;
+    }
+
+
+
+    public static List<Point> getPoints(Mat mat) {
+        //draw a circle
+        Mat circle = new Mat(mat.size(), CvType.CV_8UC1, new Scalar(0, 0, 0));
+        Mat redDots = new Mat();
+        Core.inRange(mat, new Scalar(0, 0, 150), new Scalar(100, 100, 255), redDots);
+        Mat kernel = Mat.ones(3, 3, CvType.CV_8UC1);
+        Imgproc.dilate(redDots, redDots, kernel, new Point(-1, -1), 1);
+        List<MatOfPoint> contours = new ArrayList<>();
+        Imgproc.findContours(redDots, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+
+        List<Point> points = new ArrayList<>();
+        for (MatOfPoint contour : contours) {
+
+            RotatedRect impact = Imgproc.fitEllipse(new MatOfPoint2f(contour.toArray()));
+            points.add(impact.center);
+        }
+        return points;
+
+    }
+
+
+
+
+
+    public static RotatedRect getOuterCircle(Mat mat) {
 //        OpenCV.loadLocally();
 //        Path currentRelativePath = Paths.get("");
 //        String s = currentRelativePath.toAbsolutePath().toString();
@@ -269,7 +350,7 @@ public class Camera extends JFrame {
         Imgproc.findContours(open, newContours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
         biggestContour = getBiggestContour(newContours);
         if (biggestContour.toList().size() < 5) {
-            return mat;
+            return null;
         }
         RotatedRect ellipse = Imgproc.fitEllipse(new MatOfPoint2f(biggestContour.toArray()));
 
@@ -292,12 +373,12 @@ public class Camera extends JFrame {
         Imgproc.findContours(xor, xorContours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
         biggestContour = getBiggestContour(xorContours);
         if (biggestContour == null || biggestContour.toList().size() < 5) {
-            return mat;
+            return null;
         }
         RotatedRect xorEllipse = Imgproc.fitEllipse(new MatOfPoint2f(biggestContour.toArray()));
         System.out.println(xorEllipse.size.width + " " + xorEllipse.size.height);
         if (xorEllipse.size.width < xorEllipse.size.height * 0.7 || xorEllipse.size.width > xorEllipse.size.height * 1.3) {
-            return mat;
+            return null;
         }
         Imgproc.ellipse(mat, xorEllipse, new Scalar(0, 255, 0), 1);
 
@@ -319,7 +400,7 @@ public class Camera extends JFrame {
 
         Imgproc.rectangle(mat, r.tl(), r.br(), new Scalar(0, 0, 255), 1);
 //        Imshow.show(mat, "test");
-        return mat;
+        return ellipse;
     }
 
 }
