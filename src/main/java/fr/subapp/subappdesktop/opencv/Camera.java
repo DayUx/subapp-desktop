@@ -317,8 +317,6 @@ public class Camera extends JFrame {
         Mat circle = new Mat(mat.size(), CvType.CV_8UC1, new Scalar(0, 0, 0));
         Imgproc.circle(circle, new Point(mat.cols() / 2, mat.rows() / 2), (int) (mat.cols() / 2.2), new Scalar(255, 255, 255), -1);
         if (show) {
-
-
             Imshow.show(circle, "circle");
         }
         Mat kernel = Mat.ones(5, 5, CvType.CV_8UC1);
@@ -349,9 +347,8 @@ public class Camera extends JFrame {
         Core.MinMaxLocResult minMaxLocResult = Core.minMaxLoc(value);
         double min = minMaxLocResult.minVal;
         double max = minMaxLocResult.maxVal;
-        Core.inRange(value, new Scalar(min), new Scalar(max / 2), value_mask);
+        Core.inRange(value, new Scalar(0), new Scalar(min+(max - min / 2)), value_mask);
         Core.bitwise_and(value_mask, circle, value_mask);
-
         if (show) {
             Imshow.show(value_mask, "value_mask");
         }

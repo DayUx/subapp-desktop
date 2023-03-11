@@ -78,7 +78,7 @@ const SaisieTirs = () => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
   const [previewTitle, setPreviewTitle] = useState("");
-  const [file, setFile] = useState<UploadFile | null>(null);
+  const [file, setFile] = useState<UploadFile | null>();
   const [loading, setLoading] = useState(false);
   const [resultImageUrl, setResultImageUrl] = useState("");
 
@@ -239,7 +239,7 @@ const SaisieTirs = () => {
           multiple={false}
           action={`${getSubAppUrl()}/cible/uploadCible`}
           listType="picture-card"
-          fileList={[file as UploadFile]}
+          fileList={file ? [file as UploadFile] : []}
           onPreview={handlePreview}
           onChange={handleChange}
           beforeUpload={(file) => {

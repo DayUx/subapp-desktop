@@ -36,6 +36,11 @@ public class CibleController {
         byte[] bytes =  cibleServiceApplicatif.processTarget(file.getFile().getBytes());
         return Base64.getEncoder().encodeToString(bytes);
     }
+    @PostMapping("uploadCibleSmartphone")
+    public @ResponseBody String saveCibleBis(@RequestBody byte[] file, HttpServletResponse response) throws IOException {
+        byte[] bytes =  cibleServiceApplicatif.processTarget(file);
+        return "data:image/png;base64,"+Base64.getEncoder().encodeToString(bytes);
+    }
 
     @GetMapping("getAll")
     public List<CibleDTO> getAllCible() {

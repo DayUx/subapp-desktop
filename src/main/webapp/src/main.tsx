@@ -7,7 +7,7 @@ import { Button } from "antd";
 import { Content } from "antd/es/layout/layout";
 import logo from "./assets/logo_l_mix.png";
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <BrowserRouter>
+  <HashRouter>
     <Routes>
       <Route
         path={"/connect"}
@@ -32,17 +32,11 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                 maxHeight: 300,
               }}
             />
-            <Button
-              onClick={() => {
-                window.location.href = "http://subapp.tirsub";
-              }}
-            >
-              Se connecter
-            </Button>
+            <Button href={"http://subapp.tirsub"}>Se connecter</Button>
           </Content>
         }
       />
       <Route path={"/*"} element={<App></App>} />
     </Routes>
-  </BrowserRouter>
+  </HashRouter>
 );
