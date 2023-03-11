@@ -6,4 +6,6 @@ Subapp-desktop est une application qui fonctionne de pair avec [subapp](https://
 
 Aperçus des résultats de l'algorithme actuel de détection des visuels
 
-![aperçu résultats](https://cdn.discordapp.com/attachments/691734422420062222/1083498196422098965/image.png)
+
+![Entrée](https://github.com/DayUx/subapp-desktop/blob/main/src/main/resources/cibleAvecImpacts.jpg)
+![Résultat](https://github.com/DayUx/subapp-desktop/blob/main/src/main/resources/result_preview.png)
