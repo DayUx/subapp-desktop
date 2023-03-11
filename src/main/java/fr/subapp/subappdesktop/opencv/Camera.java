@@ -1,16 +1,24 @@
 package fr.subapp.subappdesktop.opencv;
 
+import fr.subapp.subappdesktop.model.ImpactDTO;
+import fr.subapp.subappdesktop.utils.Zone;
 import nu.pattern.OpenCV;
 import org.opencv.core.*;
 import org.opencv.core.Point;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.videoio.VideoCapture;
 
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 public class Camera extends JFrame {
+
+
+    private static final Scalar pointColor = new Scalar(28,50,129);
 
     private JLabel cameraScreen = new JLabel();
 
@@ -58,7 +66,6 @@ public class Camera extends JFrame {
         Imgproc.morphologyEx(img, img, Imgproc.MORPH_CLOSE, kernel, new Point(-1, -1), 3);
 
 
-
         // convert the image to grayscale, blur it, and find edges
         // in the image
         Mat gray = new Mat();
@@ -75,21 +82,10 @@ public class Camera extends JFrame {
         Core.multiply(backgroundRemoved, new Scalar(maxValue / Core.minMaxLoc(backgroundRemoved).maxVal), backgroundRemoved);
 
 
-
-
-
-
-
         Imgproc.GaussianBlur(backgroundRemoved, gray, new Size(5, 5), 0);
 
 
-
-
-
-
         Mat edged = new Mat();
-
-
 
 
         Imgproc.Canny(gray, edged, 75, 200);
@@ -105,7 +101,7 @@ public class Camera extends JFrame {
         MatOfPoint2f screenCnt = null;
 
         //loop over the contours
-        for(MatOfPoint contour : contours) {
+        for (MatOfPoint contour : contours) {
             // approximate the contour
             MatOfPoint2f contour2f = new MatOfPoint2f(contour.toArray());
             double approxDistance = Imgproc.arcLength(contour2f, true) * 0.02;
@@ -166,10 +162,6 @@ public class Camera extends JFrame {
     }
 
 
-
-
-
-
     private static MatOfPoint getBiggestContour(List<MatOfPoint> contours) {
         double maxArea = 0;
         MatOfPoint biggestContour = null;
@@ -182,7 +174,6 @@ public class Camera extends JFrame {
         }
         return biggestContour;
     }
-
 
 
     public void startCamera() {
@@ -208,10 +199,10 @@ public class Camera extends JFrame {
     public static float getDistance(Point p1, Point p2) {
         return (float) Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
     }
+
     public static float getAngle(Point p1, Point p2) {
         return (float) Math.atan2(p2.y - p1.y, p2.x - p1.x);
     }
-
 
 
     public static int getPoint(Point center, Point border, Point impact) {
@@ -261,12 +252,28 @@ public class Camera extends JFrame {
     }
 
 
-
     public static List<Point> getPoints(Mat mat) {
         //draw a circle
         Mat circle = new Mat(mat.size(), CvType.CV_8UC1, new Scalar(0, 0, 0));
         Mat redDots = new Mat();
-        Core.inRange(mat, new Scalar(0, 0, 150), new Scalar(100, 100, 255), redDots);
+
+//        image_blur_hsv = cv2.cvtColor(image_blur, cv2.COLOR_RGB2HSV)
+//        min_ora = np.array([10, 50, 50])
+//        max_ora = np.array([30, 255, 255])
+//        mask1 = cv2.inRange(image_blur_hsv, min_ora, max_ora)
+//        min_ora2 = np.array([170, 50, 50])
+//        max_ora2 = np.array([180, 255, 255])
+//        mask2 = cv2.inRange(image_blur_hsv, min_ora2, max_ora2)
+//        mask = mask1 + mask2
+
+        Mat hsv = new Mat();
+        Imgproc.cvtColor(mat, hsv, Imgproc.COLOR_BGR2HSV);
+
+        List<Mat> hsvChannels = new ArrayList<>();
+        Core.split(hsv, hsvChannels);
+        redDots = getColor(mat, pointColor);
+//        Imshow.show(redDots, "redDots");
+//        Imshow.show(hsv, "hsv");
         Mat kernel = Mat.ones(3, 3, CvType.CV_8UC1);
         Imgproc.dilate(redDots, redDots, kernel, new Point(-1, -1), 1);
         List<MatOfPoint> contours = new ArrayList<>();
@@ -274,16 +281,29 @@ public class Camera extends JFrame {
 
         List<Point> points = new ArrayList<>();
         for (MatOfPoint contour : contours) {
-
+            if (contour.size().height < 5) {
+                continue;
+            }
             RotatedRect impact = Imgproc.fitEllipse(new MatOfPoint2f(contour.toArray()));
             points.add(impact.center);
         }
         return points;
-
     }
 
-
-
+    public static Mat getColor(Mat mat, Scalar color) {
+        Mat colorMat = new Mat(new Size(1,1), CvType.CV_8UC3, color);
+        Mat hsv = new Mat();
+        Imgproc.cvtColor(colorMat, hsv, Imgproc.COLOR_BGR2HSV);
+        Scalar min = new Scalar(hsv.get(0, 0)[0] - 10, 100, 50);
+        Scalar max = new Scalar(hsv.get(0, 0)[0] + 10, 255, 255);
+        Mat mask = new Mat();
+        Mat hsvMat = new Mat();
+        Imgproc.cvtColor(mat, hsvMat, Imgproc.COLOR_BGR2HSV);
+        Core.inRange(hsvMat, min, max, mask);
+        Mat kernel = Mat.ones(3, 3, CvType.CV_8UC1);
+        Imgproc.morphologyEx(mask, mask, Imgproc.MORPH_OPEN, kernel);
+        return mask;
+    }
 
 
     public static RotatedRect getOuterCircle(Mat mat) {
@@ -292,25 +312,31 @@ public class Camera extends JFrame {
 //        String s = currentRelativePath.toAbsolutePath().toString();
 //        System.out.println("Current absolute path is: " + s);
 //        Mat mat = Imgcodecs.imread("./src/main/resources/img.png");
-
+        boolean show = false;
         //draw a circle
-        Mat circle = new Mat(mat.size(), CvType.CV_8UC1, new Scalar(0,0, 0));
-        Imgproc.circle(circle, new Point(mat.cols() / 2, mat.rows() / 2), (int) (mat.cols() / 2.2), new Scalar(255,255,255), -1);
-//        Imshow.show(circle, "circle");
+        Mat circle = new Mat(mat.size(), CvType.CV_8UC1, new Scalar(0, 0, 0));
+        Imgproc.circle(circle, new Point(mat.cols() / 2, mat.rows() / 2), (int) (mat.cols() / 2.2), new Scalar(255, 255, 255), -1);
+        if (show) {
+
+
+            Imshow.show(circle, "circle");
+        }
         Mat kernel = Mat.ones(5, 5, CvType.CV_8UC1);
 
 
-
-
-
-        Mat redDots = new Mat();
-        Core.inRange(mat, new Scalar(0, 0, 150), new Scalar(100, 100, 255), redDots);
+        Mat redDots = getColor(mat, pointColor);
         Imgproc.dilate(redDots, redDots, kernel, new Point(-1, -1), 1);
         Mat removeHoles = new Mat();
         Core.bitwise_not(redDots, redDots);
+        if (show) {
+            Imshow.show(redDots, "redDots");
+        }
 //        Imshow.show(redDots, "redDots");
 
         Core.bitwise_and(mat, mat, removeHoles, redDots);
+        if (show) {
+            Imshow.show(removeHoles, "removeHoles");
+        }
 //        Imshow.show(removeHoles, "removeHoles");
         Mat hsv = new Mat();
         Imgproc.cvtColor(removeHoles, hsv, Imgproc.COLOR_BGR2HSV);
@@ -320,13 +346,22 @@ public class Camera extends JFrame {
         Mat value = hsvChannels.get(2);
 
         Mat value_mask = new Mat();
-        Core.inRange(value, new Scalar(0), new Scalar(150), value_mask);
-        Core.bitwise_and(value_mask,circle , value_mask);
+        Core.MinMaxLocResult minMaxLocResult = Core.minMaxLoc(value);
+        double min = minMaxLocResult.minVal;
+        double max = minMaxLocResult.maxVal;
+        Core.inRange(value, new Scalar(min), new Scalar(max / 2), value_mask);
+        Core.bitwise_and(value_mask, circle, value_mask);
 
+        if (show) {
+            Imshow.show(value_mask, "value_mask");
+        }
 //        Imshow.show(value_mask, "value_mask");
 
         Mat close = new Mat();
         Imgproc.morphologyEx(value_mask, close, Imgproc.MORPH_CLOSE, kernel);
+        if (show) {
+            Imshow.show(close, "close");
+        }
 
 //        Imshow.show(close, "close");
 
@@ -364,7 +399,6 @@ public class Camera extends JFrame {
         Core.bitwise_xor(empty, open, xor);
 
 
-
         Imgproc.morphologyEx(xor, xor, Imgproc.MORPH_OPEN, kernel);
         Core.bitwise_not(xor, xor);
         Core.bitwise_and(open, xor, xor);
@@ -383,24 +417,99 @@ public class Camera extends JFrame {
         Imgproc.ellipse(mat, xorEllipse, new Scalar(0, 255, 0), 1);
 
 
-
 //        Imshow.show(xor, "xor");
-
-
-
-
 
 
         Rect r = Imgproc.boundingRect(biggestContour);
 
 
-
-
-
-
         Imgproc.rectangle(mat, r.tl(), r.br(), new Scalar(0, 0, 255), 1);
-//        Imshow.show(mat, "test");
+        if (show) {
+            Imshow.show(mat, "test");
+        }
         return ellipse;
     }
+
+
+    public static byte[] getResult(byte[] image) {
+
+        Mat mat = Imgcodecs.imdecode(new MatOfByte(image), Imgcodecs.IMREAD_COLOR);
+        byte[] imageData;
+        mat = Camera.extractDocument(mat);
+        RotatedRect ellipseTopLeft = Camera.getOuterCircle(Camera.getTopLeftTarget(mat));
+        RotatedRect ellipseTopRight = Camera.getOuterCircle(Camera.getTopRightTarget(mat));
+        if (ellipseTopRight != null) {
+            ellipseTopRight.center.x = ellipseTopRight.center.x + mat.size().width / 2;
+        } else {
+            return null;
+        }
+        RotatedRect ellipseCenter = Camera.getOuterCircle(Camera.getCenterTarget(mat));
+        if (ellipseCenter != null) {
+            ellipseCenter.center.x = ellipseCenter.center.x + mat.size().width / 4;
+            ellipseCenter.center.y = ellipseCenter.center.y + mat.size().height / 4;
+        } else {
+            return null;
+        }
+        RotatedRect ellipseBottomLeft = Camera.getOuterCircle(Camera.getBottomLeftTarget(mat));
+        if (ellipseBottomLeft != null) {
+            ellipseBottomLeft.center.y = ellipseBottomLeft.center.y + mat.size().height / 2;
+        } else {
+            return null;
+        }
+        RotatedRect ellipseBottomRight = Camera.getOuterCircle(Camera.getBottomRightTarget(mat));
+        if (ellipseBottomRight != null) {
+            ellipseBottomRight.center.x = ellipseBottomRight.center.x + mat.size().width / 2;
+            ellipseBottomRight.center.y = ellipseBottomRight.center.y + mat.size().height / 2;
+        } else {
+            return null;
+        }
+        List<Point> impactPoints = Camera.getPoints(mat);
+        HashMap<Zone, RotatedRect> ellipseMap = new HashMap<>();
+        ellipseMap.put(Zone.TOP_LEFT, ellipseTopLeft);
+        ellipseMap.put(Zone.TOP_RIGHT, ellipseTopRight);
+        ellipseMap.put(Zone.CENTER, ellipseCenter);
+        ellipseMap.put(Zone.BOTTOM_LEFT, ellipseBottomLeft);
+        ellipseMap.put(Zone.BOTTOM_RIGHT, ellipseBottomRight);
+        List<ImpactDTO> impactDTOList = new ArrayList<>();
+        HashMap<Zone, List<Point>> impactMap = new HashMap<>();
+        for (Point point : impactPoints) {
+            Imgproc.circle(mat, point, 1, new Scalar(0, 255, 0), -1);
+            Zone zoneToInsert = null;
+            float minDistance = Float.MAX_VALUE;
+            for (Zone zone : ellipseMap.keySet()) {
+                if (minDistance > Camera.getDistance(point, ellipseMap.get(zone).center)) {
+                    minDistance = Camera.getDistance(point, ellipseMap.get(zone).center);
+                    zoneToInsert = zone;
+                }
+            }
+            System.out.println(zoneToInsert);
+            if (impactMap.containsKey(zoneToInsert)) {
+                impactMap.get(zoneToInsert).add(point);
+            } else {
+                List<Point> pointList = new ArrayList<>();
+                pointList.add(point);
+                impactMap.put(zoneToInsert, pointList);
+            }
+        }
+        for (Zone zone : impactMap.keySet()) {
+            for (Point point : impactMap.get(zone)) {
+                double angle = Camera.getAngle(point, ellipseMap.get(zone).center) + Math.toRadians(360);
+                double ellipseAngle = Math.toRadians(ellipseMap.get(zone).angle +360);
+                angle = angle - (ellipseAngle);
+                System.out.println(angle);
+                Point pointOnEllipse = Camera.getPointOnEllipse(ellipseMap.get(zone).center, ellipseMap.get(zone).size.width/2,  ellipseMap.get(zone).size.height/2, angle);
+                pointOnEllipse = Camera.rotatePoint(ellipseMap.get(zone).center,pointOnEllipse, ellipseAngle + Math.toRadians(180));
+                Imgproc.circle(mat, pointOnEllipse, 2, new Scalar(255, 0, 0), -1);
+                Imgproc.putText(mat, String.valueOf(Camera.getPoint(ellipseMap.get(zone).center, pointOnEllipse, point)), point, 1, 2, new Scalar(0, 255, 0), 2);
+            }
+        }
+        final MatOfByte buf = new MatOfByte();
+        Mat dst = mat.clone();
+        Imgcodecs.imencode(".jpg", dst, buf);
+        imageData = buf.toArray();
+        return imageData;
+    }
+
+
 
 }

@@ -8,6 +8,7 @@ import {
   OrderedListOutlined,
   TeamOutlined,
   FlagOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
 import { Button, Layout, Menu, theme, Typography, ConfigProvider } from "antd";
 const { Title, Text } = Typography;
@@ -47,6 +48,7 @@ function App() {
         return <div>Résultats</div>;
       case "5":
         return <div>Paramètres</div>;
+      case "Calcul_tir":
     }
   };
   const getLabel = (): string => {
@@ -68,6 +70,11 @@ function App() {
       key: "3",
       icon: <TeamOutlined />,
       label: "Compétiteurs",
+    },
+    {
+      key: "Calcul_tir",
+      icon: <PlusOutlined />,
+      label: "Calcul tir",
     },
     {
       key: "4",

@@ -1,1 +1,4 @@
-export const SUBAPP_URL = "http://localhost:8080/api";
+export const getSubAppUrl = () => {
+  return "http://localhost:8080/api";
+  return `${location.protocol}//${location.hostname}:${location.port}/api`;
+};

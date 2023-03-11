@@ -77,7 +77,6 @@ const TargetPreview = ({ impacts = [] }: TargetPreviewProps) => {
   };
 
   const sizeToPercent = (size: number) => {
-    console.log((size / cibleSize) * 100 + "%");
     return (size / cibleSize) * 100 + "%";
   };
 

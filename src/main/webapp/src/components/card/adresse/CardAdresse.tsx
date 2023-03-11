@@ -1,6 +1,6 @@
 import { Card, Layout, QRCode, Skeleton } from "antd";
 import React, { useEffect, useState } from "react";
-import { SUBAPP_URL } from "../../../Utils/AppUtils";
+import { getSubAppUrl } from "../../../Utils/AppUtils";
 const { Content } = Layout;
 interface Adresse {
   port: number;
@@ -11,7 +11,7 @@ const CardAdresse = () => {
   const [adresse, setAdresse] = useState<Adresse>({} as Adresse);
 
   useEffect(() => {
-    fetch(`${SUBAPP_URL}/app/getIpAndPort`, {
+    fetch(`${getSubAppUrl()}/app/getIpAndPort`, {
       method: "GET",
     }).then((res) => {
       const ok = res.ok;
@@ -45,7 +45,7 @@ const CardAdresse = () => {
         }}
       >
         <QRCode
-          value={`htpp://subapp.tirsub`}
+          value={`https://${adresse.ip}:${adresse.port}/connect`}
           status={adresse.ip && adresse.port ? undefined : "loading"}
         />
 
@@ -74,7 +74,6 @@ const CardAdresse = () => {
                 width: "fit-content",
                 backgroundColor: "#1677ff",
                 color: "white",
-
                 height: "100%",
                 padding: "10px 20px",
               }}

@@ -8,11 +8,16 @@ import {
   List,
   Menu,
   MenuProps,
+  Modal,
   Segmented,
   Tag,
   theme,
   Tooltip,
+  Upload,
+  UploadFile,
+  UploadProps,
 } from "antd";
+
 import {
   AimOutlined,
   CheckOutlined,
@@ -20,11 +25,13 @@ import {
   ClockCircleOutlined,
   FieldTimeOutlined,
   TeamOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
 import TagEpreuve from "../../components/tag/epreuve/TagEpreuve";
-import { SUBAPP_URL } from "../../Utils/AppUtils";
+import { getSubAppUrl } from "../../Utils/AppUtils";
 import TargetPreview from "../../components/targetpreview/TargetPreview";
 import { impactData, TargetData } from "../../Utils/target/TargetUtils";
+import { RcFile, UploadChangeParam } from "antd/es/upload";
 const { Header, Sider, Content } = Layout;
 
 interface CibleData {
@@ -68,9 +75,15 @@ const SaisieTirs = () => {
   const [cibles, setCibles] = useState<CibleData[]>([]);
   const [selectedCible, setSelectedCible] = useState<CibleData | null>(null);
   const [selectedKeys, setSelectedKeys] = useState();
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState("");
+  const [previewTitle, setPreviewTitle] = useState("");
+  const [file, setFile] = useState<UploadFile | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [resultImageUrl, setResultImageUrl] = useState("");
 
   useEffect(() => {
-    fetch(`${SUBAPP_URL}/cible/getAll`, {
+    fetch(`${getSubAppUrl()}/cible/getAll`, {
       method: "GET",
     }).then((res) => {
       const ok = res.ok;
@@ -131,6 +144,56 @@ const SaisieTirs = () => {
     return menuItems;
   };
 
+  const getBase64 = (file: RcFile): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+
+  const handleCancel = () => setPreviewOpen(false);
+
+  const handlePreview = async (file: UploadFile) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj as RcFile);
+    }
+
+    setPreviewImage(file.url || (file.preview as string));
+    setPreviewOpen(true);
+    setPreviewTitle(
+      file.name || file.url!.substring(file.url!.lastIndexOf("/") + 1)
+    );
+  };
+
+  const handleChange: UploadProps["onChange"] = (
+    info: UploadChangeParam<UploadFile>
+  ) => {
+    if (info.file.status === "uploading") {
+      setLoading(true);
+      return;
+    }
+    if (info.file.status === "done") {
+      // Get this url from response in real world.
+      getBase64(info.file.originFileObj as RcFile).then((imageUrl) => {
+        setLoading(false);
+        setPreviewImage(imageUrl);
+        setPreviewOpen(true);
+        setPreviewTitle(
+          info.file.name ||
+            info.file.url!.substring(info.file.url!.lastIndexOf("/") + 1)
+        );
+      });
+    }
+  };
+
+  const uploadButton = (
+    <div>
+      <PlusOutlined />
+      <div style={{ marginTop: 8 }}>Upload</div>
+    </div>
+  );
+
   return (
     <div
       style={{
@@ -162,7 +225,7 @@ const SaisieTirs = () => {
             selectedCible && selectedCible.impacts ? selectedCible.impacts : []
           }
         ></TargetPreview>
-        <Image src={selectedCible?.cheminImg}></Image>
+        <Image src={resultImageUrl}></Image>
         <button
           onClick={() => {
             cibles.push(cibles[0]);
@@ -171,6 +234,55 @@ const SaisieTirs = () => {
         >
           Valider
         </button>
+
+        <Upload
+          multiple={false}
+          action={`${getSubAppUrl()}/cible/uploadCible`}
+          listType="picture-card"
+          fileList={[file as UploadFile]}
+          onPreview={handlePreview}
+          onChange={handleChange}
+          beforeUpload={(file) => {
+            setFile(file);
+            return false;
+          }}
+        >
+          {uploadButton}
+        </Upload>
+        <Modal
+          visible={previewOpen}
+          title={previewTitle}
+          footer={null}
+          onCancel={handleCancel}
+        >
+          <img alt="example" style={{ width: "100%" }} src={previewImage} />
+        </Modal>
+        <Button
+          onClick={() => {
+            if (file) {
+              const formData = new FormData();
+              formData.append("file", file as RcFile);
+              setLoading(true);
+              fetch(`${getSubAppUrl()}/cible/uploadCible`, {
+                method: "POST",
+                body: formData,
+              }).then((res) => {
+                const ok = res.ok;
+                res.text().then(async (json) => {
+                  if (ok) {
+                    setLoading(false);
+                    setResultImageUrl("data:image/jpeg;base64," + json);
+                    console.log(json);
+                  } else {
+                    console.log("error");
+                  }
+                });
+              });
+            }
+          }}
+        >
+          Upload
+        </Button>
       </div>
     </div>
   );
